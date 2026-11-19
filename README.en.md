@@ -1,137 +1,41 @@
-# UsageMeter
+# UsageMeter for Windows
 
-**한국어** → [README.md](README.md)
+[한국어](README.md) · **English**
 
-A macOS menu-bar overlay widget that shows your remaining **Claude · Gemini · Codex (ChatGPT plan)** usage as thin colored bands along the screen edges.
-As you use up your quota, the band gets shorter — so you can tell how much is left at a glance, without opening anything.
+A Windows tray widget that shows your remaining **Claude · Gemini · Codex (ChatGPT plan)** usage as thin colored bands along the screen edges.
+As you use up your quota, the band gets shorter, so you can tell how much is left at a glance.
 
-> 🦀 **Rewritten in Rust as of v2.0.0.** Features and screens match 1.5.0, and idle memory dropped from about 100 MB to 13-36 MB. Updating from 1.5.0 keeps your settings, logins and history.
+This repository is **the Windows version, published to the Microsoft Store**. The macOS version lives in [usagemeter](https://github.com/WWhaleFe/usagemeter); both are built from the same Rust code.
 
-## ⬇️ Download (macOS)
+## ⬇️ Install
 
-**🍺 Homebrew (recommended)**
+- **Microsoft Store**: coming soon. Once published, the Store keeps it up to date.
+- **Test builds**: get the file for your PC from [Releases](https://github.com/WWhaleFe/usagemeter-windows/releases).
+  - Most PCs: `UsageMeter-<version>-windows-x64-setup.exe`
+  - ARM PCs (e.g. Snapdragon): `...-windows-arm64-setup.exe` (Settings → System → About → "System type")
+  - Without installing: unzip `-portable.zip` and run `usagemeter.exe` (needs Microsoft Edge WebView2, built into Windows 11)
+  - If "Windows protected your PC" appears on first run, choose **More info → Run anyway** (test builds are not code-signed yet)
+  - Test builds match the Store app (no in-app update check). Get new test builds from Releases.
 
-```sh
-brew install --cask wwhalefe/tap/usagemeter
-```
-
-Update:
-
-```sh
-brew update && brew upgrade --cask usagemeter
-```
-
-This quits the running app, replaces it with the new version and starts it again (settings and logins are kept). Run `brew update` as well so a new version shows up right away — Homebrew refreshes taps on its own only once a day.
-Remove: `brew uninstall --cask usagemeter` (add `--zap` to also delete settings and history).
-The tap ([WWhaleFe/homebrew-tap](https://github.com/WWhaleFe/homebrew-tap)) checks for new releases every 30 minutes and follows them automatically.
-
-> 💡 If you already installed from the zip and get an `already an App` error, overwrite it with `brew install --cask --force wwhalefe/tap/usagemeter` (settings and logins are kept).
-
-> 💡 If Homebrew refuses with an `untrusted tap` error, run `brew trust --cask wwhalefe/tap/usagemeter` first, then install again.
-
-**Direct download**
-
-**[Get the latest release](https://github.com/WWhaleFe/usagemeter/releases/latest)** — download `UsageMeter-vX.X.X.zip` → unzip → drag the app into **Applications**.
-Universal binary (Apple Silicon + Intel), macOS 14+.
-
-> ⚠️ The app is not notarized yet, so when installed from the zip the first launch requires **right-click → Open** (not needed with Homebrew). If it still won't open, go to System Settings → Privacy & Security and click "Open Anyway".
-
-> 🪟 **The Windows version** lives in [usagemeter-windows](https://github.com/WWhaleFe/usagemeter-windows) and is being prepared for the Microsoft Store. Test installers are in that repository's Releases.
-
-<br>
+Windows 10/11, x64 and ARM64.
 
 ## ✨ Features
 
-- **Screen-edge overlay** — a colored band fills to your remaining ratio and shrinks from the anchor as you use quota.
-- **Multi AI** — Claude (coral) · Gemini (blue) · Codex (teal). By default they **overlap** on the same rail (most urgent on top); enable the split option to give each AI its own lines.
-- **Screen partitions** — split the screen with a menu-bar line and a Dock line, then wrap any region (e.g. just the menu bar, or just the Dock). Adjust boundaries by dragging directly on screen.
-- **Segment layout** — 4 horizontal lines (top / menu line / Dock line / bottom) + 3 vertical sections per side, picked by clicking an interactive diagram. Only connected chains/loops are allowed; one-click shape presets included.
-- **Corner control** — per-zone corner radii (with linked-boundary toggle), curve horizontal line ends up/down, scoop (concave wrap) corners, notch wrap with auto-detection.
-- **Resolution & device auto-adapt** — when the resolution/scale or monitor setup changes, the border is redrawn to fit the new screen automatically. Notched MacBooks get notch wrap and top corner radius fitted to the device on first launch; on a resolution change the notch is re-detected from the device and the corner radii scale with the resolution ("Fit to this device" in the menu re-applies it anytime).
-- **Overlap rendering** — **by default all lines overlap**: shared spans stack with the most urgent (lowest-remaining) band on top, so lines overlap even when shapes only partially match. **Only when you enable "split overlapping lines"** does the shared span divide into side-by-side lanes — and even then each line meets at the same depth across all four corners. Line thickness goes up to 15, with width transitions smoothed over hundreds of points so they're imperceptible.
-- **Menu bar** — remaining-ratio ring icon (pick the reference AI), per-AI % next to the icon, and a high-contrast dropdown info card (light/dark aware) with 5-hour · weekly · per-model-weekly remaining, reset countdown, depletion forecast, and a 24-hour mini chart (values shown on hover).
-- **Plan & per-model usage** — a subscription-plan badge next to each AI (e.g. Claude `Max (5x)`), plus 5-hour (current session), weekly (all models), and per-model weekly (e.g. `Fable`) remaining. Only the buckets the server actually returns are shown.
-- **Analytics dashboard (reworked in v1.5.0)** - open it via "View Analytics" from the menu/Settings. For a range (1 day · 3 days · week · month): summary KPIs (total, daily average, busiest hour, limit hits), **consumption share by AI**, **usage by hour**, **remaining over time** (a line chart that shows each reset), **consumption over time**, a **weekday × hour heatmap**, and an **item details table** (remaining now, consumption, resets, average use before reset, limit hits, burn rate, run-out outlook). Use the chips to **compare all AIs** or pick **one AI**: every chart then switches to that AI's items (5-hour, weekly and per-model limits), and item chips narrow it further. Item history is recorded from 1.5.0; earlier history is shown for the 5-hour item only.
-- **Appearance (light/dark/system)** — follow the device or pick manually; menus, settings, and hover panels follow the theme.
-- **AI display order** — one shared order for the dropdown, hover, and the menu-bar %.
-- **Alerts** — macOS notifications at 75 / 90 / 95% usage.
-- **Version & updates** — the current version is shown at the bottom of the menu-bar popup and at the top of Settings, along with **"Check for Updates"**, **"Download Latest"** (saves the zip straight to your Downloads folder and reveals it in Finder), and **"Open Releases Page"**. It checks GitHub releases at launch and every 24 hours, notifying you once per new version (auto-check can be turned off). Installing — unzip and move to Applications — is still manual.
-- **Light memory footprint (v1.2.6)** — sitting in the menu bar just refreshing usage, the app uses about **100 MB** (earlier versions used 1.5 GB+). After you open and use the Settings/Analytics windows it settles around **150–200 MB** (SwiftUI window memory isn't returned right away). Idle CPU is essentially 0%. See [MEMORY-REPORT.md](MEMORY-REPORT.md) for the full investigation.
-- **Temporarily hide the border** — a "Hide border" toggle in the menu bar turns the overlay (usage display) off and on (not persisted). Turn on **"Hide border on launch"** in Settings to start hidden every time (v1.2.7).
-- **Hover info (v1.2.7)** — hover over the colored border bands or near the menu-bar icon/% to show a usage panel; each can be turned off in Settings. For the border you can choose which areas react — **whole edges (top/bottom/left/right)** or **corner zones only** (adjustable length). The menu-bar hover area is sized from the actual menu-bar height and width of the display the icon is on.
-- **Per-item colors and depletion (v1.4.1)** — the **Details** tab in Settings shows remaining/used % for each AI's 5-hour, weekly and per-model limits (e.g. `Gemini 4 Argon`, `Claude·GPT (agy)`, Claude `Fable`). With color overlay on, every item is drawn in its own color on the same border line and **each color depletes with its own limit** (lowest remaining on top); you choose each item's color and whether it appears on the bar and in the menu. The dropdown and hover show matching color dots. Codex (ChatGPT) also gets Code Review and per-model extra limits as items when the server reports them. While an AI is logged out or can't be read, the last-read items stay editable (v1.5.0).
-- **Multi-monitor — per-display borders (v1.2.8)** — every connected display gets a border, and each display has its own line, partition, layout, corner and notch settings. Pick the display to edit at the top of Settings, turn the border off per display, or copy one display's settings to the others. A newly connected display starts from the main display's settings fitted to that screen (notch, corner radius), and each monitor's settings are remembered. Language, menu bar, AI colors and similar options are shared.
-- **Convenience** — login tab for per-AI sign in/out, auto-refresh interval (1 min–2 h or custom), 10 named presets + default-state save, launch at login, Korean / English / Japanese UI. While a Settings/Analytics window is open, a Dock icon lets you bring it back.
-- Every setting persists across restarts.
+- Colored bands per AI along the screen edges showing remaining (or used) quota, with sub-items (5-hour, weekly, per-model)
+- Hover a band for usage details, with the hovered line emphasized
+- Tray icon: click for an info card with a mini chart, or the menu (click behavior is configurable)
+- A line around the taskbar that follows it to any side of the screen
+- Usage alerts and an analytics window
+- 한국어 · English · 日本語
 
-## 🧩 How it works
+## 🔒 Privacy
 
-- Usage is read via **in-page `fetch` inside a logged-in WKWebView**, which passes Cloudflare naturally (plain curl/URLSession gets 403).
-- Claude: `GET /api/organizations/{uuid}/usage` (5-hour · weekly + per-model `weekly_scoped` buckets from `limits`) plus the plan from `rate_limit_tier`. Gemini: when Google Antigravity CLI (`agy`) is installed and signed in, reads live quota (`agy -p /usage --output-format json` — 5-hour · weekly + `Gemini 4 Argon` · `Claude·GPT (agy)` buckets) and refreshes immediately on `~/.gemini/antigravity-cli` activity via FSEvents, falling back to the `gemini.google.com/usage` DOM (usage % + reset time, v1.2.9) otherwise (v1.3.0). Codex: the same internal endpoint the official dashboard uses (`backend-api/wham/usage`) via the chatgpt.com session.
-- **Web views are kept to a minimum (v1.2.6)** — Claude and Codex only need `fetch`, so instead of loading the service SPA the app loads **an empty document on that origin** (cookies and Cloudflare still work exactly the same). Gemini needs the rendered DOM, so its web view is **created only for a poll and destroyed right after** (alive for 4–6 s out of every 5 min). Web views went from ~1.1 GB down to **~26 MB**; together with the overlay change below, the whole app went from **~1.5 GB to ~100 MB** while resident.
-- The overlay is a borderless transparent window (click-through, above the menu bar and regular apps) drawn imperatively with SwiftUI **Canvas**. It's built from **thin strip windows that wrap only the edges/lines and never cover the screen center (a "hollow frame")**, so it doesn't hide the purchase/install/auth buttons (including Touch ID) that apps like App Store · Music · TV · Books · System Settings · web Apple Pay show in the center (v1.2.2 — avoids macOS's overlay-blocking behavior). Each strip draws into a **canvas its own size**, shifting only the drawing origin so paths are still computed in full-screen coordinates (v1.2.6 — previously every strip allocated a full-screen layer backing store). The border is modeled as a segment graph; overlapping spans are computed as trim ranges along the path and widths are blended with Gaussian smoothing.
-- Cookies stay in the local `WKWebsiteDataStore.default()` only and are **never sent anywhere**.
+Sign-ins and usage stay on this PC and are never sent to the developer. See [PRIVACY.md](PRIVACY.md).
 
-## 🚀 Run (development)
+## 🐞 Report a problem
 
-Runs with just the Command Line Tools' Swift — no full Xcode needed. **macOS 14+**.
+Open an [issue](https://github.com/WWhaleFe/usagemeter-windows/issues). Attaching `%APPDATA%\UsageMeter\usagemeter.log` helps (it never contains cookies or conversations).
 
-```sh
-swift run UsageMeter
-```
+## Development
 
-Sign in from the menu-bar icon → **AI Login / Logout** (or the Login tab in Settings) and the bands appear.
-
-## 📦 Package as an app
-
-```sh
-./build-app.sh          # builds a universal UsageMeter.app (icon = icon.png)
-open UsageMeter.app
-```
-
-- Menu-bar-only app (no Dock icon, LSUIElement).
-- Universal binary: arm64 + x86_64 combined with `lipo` (no Xcode required).
-- Ad-hoc signed, so the first launch may require **right-click → Open**.
-- The `.app` uses a separate cookie/settings store from `swift run`, so sign in again inside the app.
-
-## 🗂 Project layout
-
-```
-usagemeter/
-  Package.swift
-  build-app.sh                  .app packaging (universal, icon.png → .icns)
-  icon.png                      app icon source
-  Sources/UsageMeter/
-    main.swift / AppDelegate.swift
-    OverlayFrameController.swift  thin edge-wrapping strip windows (transparent, click-through)
-    BorderView.swift            Canvas renderer + SegmentChainShape (segment graph)
-    OverlaySettings.swift       shared settings (persisted)
-    Localization.swift          ko/en/ja strings
-    Providers.swift / WebSession.swift / ProviderManager.swift
-    AgyIntegration.swift        Antigravity CLI (agy) quota query + FSEvents real-time watcher (v1.3.0)
-    StatusBarController.swift   menu bar
-    MenuInfoCardView.swift      dropdown info card (high-contrast, plan/model)
-    SettingsView.swift / SettingsWindowController.swift
-    SupportView.swift           Support tab (GitHub Sponsors + KakaoPay QR)
-    AnalyticsView.swift / AnalyticsWindowController.swift   analytics dashboard
-    AnalyticsModel.swift   analytics math (consumption, resets, window use, burn rate)
-    DockPresence.swift          Dock icon while a window is open
-    LineDragOverlay.swift       on-screen drag adjustment for partition lines
-    HistoryStore.swift / MiniChartView.swift / NotificationManager.swift
-    RefreshScheduler.swift
-    UpdateChecker.swift         version check + latest-release download
-    LoginWindowController.swift / PopupWebView.swift / HoverInfoController.swift
-  .github/FUNDING.yml           repo sponsor button
-  MEMORY-REPORT.md              memory investigation & optimization log (v1.2.6)
-  PROGRESS.md                   development log
-```
-
-## ⚠️ Notes
-
-- Relies on unofficial endpoints/DOM of claude.ai / gemini / chatgpt.com — queries may break if those services change.
-- ChatGPT's regular **chat** quota is not exposed anywhere, so it can't be monitored — the **Codex (agent) usage** of the same plan is supported instead.
-- Gemini querying is still experimental.
-
-## 📄 License
-
-[MIT](LICENSE)
+The code is in `rust/` (Tauri 2 + Svelte), shared with the macOS version. Packaging: `.github/workflows/package-windows.yml`; tests: `rust/tools/check.sh`.

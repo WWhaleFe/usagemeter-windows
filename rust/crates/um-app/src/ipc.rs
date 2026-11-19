@@ -52,6 +52,13 @@ fn snapshot_value(s: &Settings) -> Value {
     serde_json::to_value(s.to_snapshot()).unwrap_or(Value::Null)
 }
 
+/// Windows에서 작업 표시줄 문구로 바꿔 보여 줄 Dock 관련 키(`win.<키>`가 i18n에 있어야 한다).
+const WIN_TERMS: [&str; 14] = [
+    "corner.linkMainDock", "part.dockHeight", "part.dockLine", "preset.dockWrap",
+    "seg.hDock", "seg.lDock", "seg.rDock", "zone.dock", "hoverArea.dockLine",
+    "part.dockBoundaryHeight", "part.dockWidth", "seg.dockVertical", "seg.dockTop", "seg.dockBottom",
+];
+
 /// 화면이 그릴 값 전부.
 #[tauri::command]
 pub fn ui_state(app: AppHandle) -> Value {
@@ -104,8 +111,18 @@ pub fn ui_state(app: AppHandle) -> Value {
             }))
         })
         .collect();
-    let strings: Map<String, Value> = um_core::i18n::keys().map(|k| (k.to_string(), Value::String(tr(st.main.bar_fill_mode.text_key(k), lang)))).collect();
+    // Windows에는 Dock이 없어 같은 구역을 작업 표시줄이라 부른다(win.<키> 문구로 바꿔 보냄).
+    let shown_key = |k: &'static str| -> String {
+        let k = st.main.bar_fill_mode.text_key(k);
+        if cfg!(windows) && WIN_TERMS.contains(&k) { format!("win.{k}") } else { k.to_string() }
+    };
+    let strings: Map<String, Value> = um_core::i18n::keys().map(|k| (k.to_string(), Value::String(tr(&shown_key(k), lang)))).collect();
     json!({
+        "dockSide": ds.iter().find(|d| edit.as_ref().or(st.main_display_id.as_ref()).map_or(d.is_primary, |id| id == &d.id))
+            .or_else(|| ds.first()).and_then(|d| d.taskbar).map(|t| match t.side {
+                um_platform::display::TaskbarSide::Top => "top", um_platform::display::TaskbarSide::Bottom => "bottom",
+                um_platform::display::TaskbarSide::Left => "left", um_platform::display::TaskbarSide::Right => "right",
+            }),
         "platform": if cfg!(target_os = "macos") { "mac" } else { "win" },
         "store": cfg!(feature = "store"),
         "version": crate::update::current_version(),

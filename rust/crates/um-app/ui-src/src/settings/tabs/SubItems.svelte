@@ -10,6 +10,8 @@
   const colors = $derived((m.subItemColors ?? {}) as Record<string, number[]>);
   const barHidden = $derived<string[]>(m.subItemBarHidden ?? []);
   const menuHidden = $derived<string[]>(m.subItemMenuHidden ?? []);
+  const chartShown = $derived<string[]>(m.subItemChartShown ?? []);
+  const analyticsHidden = $derived<string[]>(m.subItemAnalyticsHidden ?? []);
   const member = (list: string[], v: string, on: boolean) => (on ? (list.includes(v) ? list : [...list, v]) : list.filter((x) => x !== v));
   function setColor(key: string, hex: string) {
     set('main', { subItemColors: { ...colors, [key]: fromHex(hex) } });
@@ -21,6 +23,7 @@
 </script>
 
 <span class="caption desc">{t('subItems.desc')}</span>
+<span class="caption desc">{t('subItems.viewDesc')}</span>
 
 {#each providers as p (p.id)}
   {@const split = splitIDs.includes(p.id)}
@@ -32,13 +35,14 @@
       {#if !p.itemsLive}<span class="caption warn">{t('subItems.lastKnown')}</span>{/if}
       {#each p.items as it (it.key)}
         {@const pct = Math.round(it.ratio * 100)}
-        {@const custom = it.key in colors}
+        {@const locked = it.key.endsWith('/5h')}
+        {@const custom = !locked && it.key in colors}
         <div class="item" style:opacity={p.itemsLive ? 1 : 0.6}>
           <div class="row">
             {#if s.platform === 'mac'}
-              <button class="color-well" disabled={!split} aria-label={it.name} onclick={() => act('pickColor', { id: p.id, item: it.key })}><span style:background={it.color}></span></button>
+              <button class="color-well" disabled={!split || locked} title={locked ? t('subItems.followsAi') : ''} aria-label={it.name} onclick={() => act('pickColor', { id: p.id, item: it.key })}><span style:background={it.color}></span></button>
             {:else}
-              <input class="color-well" type="color" value={it.color} disabled={!split} aria-label={it.name} onchange={(e) => setColor(it.key, e.currentTarget.value)} />
+              <input class="color-well" type="color" value={it.color} disabled={!split || locked} title={locked ? t('subItems.followsAi') : ''} aria-label={it.name} onchange={(e) => setColor(it.key, e.currentTarget.value)} />
             {/if}
             <span class="name grow" title={it.name}>{it.name}</span>
             <span class="bar" style:background={it.color + '2e'} aria-hidden="true"><span style:background={it.color} style:width="{pct}%"></span></span>
@@ -47,6 +51,8 @@
           <div class="row opts">
             <label class="chk"><input type="checkbox" checked={!barHidden.includes(it.key)} disabled={!split} onchange={(e) => set('main', { subItemBarHidden: member(barHidden, it.key, !e.currentTarget.checked) })} />{t('subItems.bar')}</label>
             <label class="chk"><input type="checkbox" checked={!menuHidden.includes(it.key)} onchange={(e) => set('main', { subItemMenuHidden: member(menuHidden, it.key, !e.currentTarget.checked) })} />{t('subItems.menu')}</label>
+            <label class="chk"><input type="checkbox" checked={chartShown.includes(it.key)} onchange={(e) => set('main', { subItemChartShown: member(chartShown, it.key, e.currentTarget.checked) })} />{t('subItems.chart')}</label>
+            <label class="chk"><input type="checkbox" checked={!analyticsHidden.includes(it.key)} onchange={(e) => set('main', { subItemAnalyticsHidden: member(analyticsHidden, it.key, !e.currentTarget.checked) })} />{t('subItems.analytics')}</label>
             <span class="grow"></span>
             <button class="reset" style:visibility={custom ? 'visible' : 'hidden'} disabled={!custom} aria-label={t('subItems.resetColor')} title={t('subItems.resetColor')} onclick={() => resetColor(it.key)}>&#8630;</button>
           </div>

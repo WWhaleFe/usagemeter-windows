@@ -59,11 +59,12 @@ fn snapshot_value(s: &Settings) -> Value {
 }
 
 /// Windows에서 작업 표시줄 문구로 바꿔 보여 줄 Dock 관련 키(`win.<키>`가 i18n에 있어야 한다).
-const WIN_TERMS: [&str; 25] = [
+const WIN_TERMS: [&str; 28] = [
     "tab.menuBar", "sec.menuIcon", "menuHover.enable", "menuHover.enableDesc", "tray.clickMode", "disp.iconDesc", "disp.iconUsedDesc", "notify.desc", "display.desc",
     "login.autostart", "corner.linkMainDock", "part.dockHeight", "part.dockLine", "preset.dockWrap",
     "seg.hDock", "seg.lDock", "seg.rDock", "zone.dock", "hoverArea.dockLine",
     "part.dockBoundaryHeight", "part.dockWidth", "seg.dockVertical", "seg.dockTop", "seg.dockBottom", "seg.dockOuter",
+    "help.menuIcon", "help.dockLine", "help.partition",
 ];
 
 /// 화면이 그릴 값 전부. 창이 늦게 뜨는 원인을 찾을 수 있게 오래 걸리면 기록한다.
@@ -394,6 +395,12 @@ pub fn ui_action(app: AppHandle, action: String, arg: Value) -> Result<Value, St
                 }
             });
         }
+        "identifyDisplays" => {
+            let labels: std::collections::BTreeMap<String, String> = arg.get("labels").cloned()
+                .and_then(|v| serde_json::from_value(v).ok()).unwrap_or_default();
+            let h = app.clone();
+            let _ = app.run_on_main_thread(move || crate::panels::identify_displays(&h, &labels));
+        }
         "copyToOthers" => {
             let edit = editing_id(&app, &crate::shared(&app).lock().unwrap());
             let ids: Vec<String> = um_platform::display::displays().into_iter().map(|d| d.id).collect();
@@ -531,6 +538,12 @@ pub fn ui_action(app: AppHandle, action: String, arg: Value) -> Result<Value, St
         "openReleases" => crate::menu::on_event(&app, "update:page"),
         "openMail" => crate::menu::on_event(&app, "report:mail"),
         "copyEmail" => crate::menu::on_event(&app, "report:copy"),
+        // Homebrew 업데이트 명령을 클립보드로. 화면은 결과(ok)를 보고 안내 팝업을 띄운다.
+        #[cfg(target_os = "macos")]
+        "copyUpdateCommand" => {
+            let ok = arboard::Clipboard::new().and_then(|mut c| c.set_text(crate::update::BREW_UPGRADE)).is_ok();
+            return Ok(json!({"ok": ok, "command": crate::update::BREW_UPGRADE}));
+        }
         "openUrl" => {
             let url = s("url").ok_or("url")?;
             if url.starts_with("https://") || url.starts_with("mailto:") {
